@@ -1,0 +1,39 @@
+name: Accessibility checks (pa11y)
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  a11y:
+    name: Accessibility checks (pa11y)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install pa11y-ci and http-server
+        run: |
+          npm ci || true
+          npm i --no-save pa11y-ci http-server wait-on
+
+      - name: Start static HTTP server
+        run: |
+          npx http-server -p 8080 >/dev/null 2>&1 &
+          npx wait-on http://localhost:8080
+        shell: bash
+
+      - name: Run pa11y-ci accessibility checks
+        run: |
+          npx pa11y-ci --config .pa11yci.json
+        shell: bash
