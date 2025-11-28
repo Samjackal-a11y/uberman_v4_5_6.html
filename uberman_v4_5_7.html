@@ -1,0 +1,29 @@
+function logModuleTrace(chunkId, sourceFile, status="loaded", extra=null) {
+  const base = `Chunk ${chunkId} ${status} from ${sourceFile}`;
+  const message = extra ? `${base} — ${extra}` : base;
+  recordDebug("ModuleLoad", message);
+}
+
+// Example traces
+logModuleTrace("87255", "copilot-chat-da81dfcac17c.js", "loaded", "warm cache");
+logModuleTrace("93549", "copilot-chat-da81dfcac17c.js", "loaded");
+logModuleTrace("65863", "65863-3cf9e0bc5627.js", "failed", "Load timeout");
+
+// Optional dynamic import wrapper
+async function importWithTrace(specifier, chunkId=null) {
+  const sourceFile = specifier.split("?")[0];
+  const id = chunkId || sourceFile;
+  const start = performance.now();
+  recordDebug("ModuleLoad", `Importing ${id} from ${sourceFile}`);
+
+  try {
+    const mod = await import(/* @vite-ignore */ specifier);
+    const dur = (performance.now() - start).toFixed(2);
+    logModuleTrace(id, sourceFile, "imported", `${dur}ms`);
+    return mod;
+  } catch (err) {
+    const dur = (performance.now() - start).toFixed(2);
+    logModuleTrace(id, sourceFile, "failed", `${err.message} — ${dur}ms`);
+    throw err;
+  }
+}
