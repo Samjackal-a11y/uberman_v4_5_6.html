@@ -1,0 +1,12 @@
+{
+  "defaults": {
+    "standard": "WCAG2AA",
+    "timeout": 30000,
+    "wait": 1000,
+    "reporter": "cli"
+  },
+  "urls": [
+    "http://localhost:8080/"
+  ],
+  "concurrency": 2
+}
